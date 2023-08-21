@@ -6,10 +6,13 @@ import { userReducer } from './reducers/user.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { UserEffects } from './effects/user.effects';
 import { HttpClientModule } from '@angular/common/http'
+import { ChatComponent } from './components/chat.component';
+import { FormsModule } from '@angular/forms';
+import { HubService } from 'ngx-signalr-hubservice'; 
 
 @NgModule({
-  declarations: [AppComponent],
-  imports: [BrowserModule, StoreModule.forRoot({ users: userReducer }), EffectsModule.forRoot([UserEffects]), HttpClientModule],
+  declarations: [AppComponent, ChatComponent],
+  imports: [BrowserModule, StoreModule.forRoot({ users: userReducer }), EffectsModule.forRoot([UserEffects]), HttpClientModule, FormsModule],
   providers: [],
   bootstrap: [AppComponent],
 })
