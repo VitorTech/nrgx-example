@@ -25,6 +25,6 @@ export class AppComponent {
     });
   }
   ngOnInit() {
-    this.store.dispatch({ type: '[Users Page] Load Users' });
+    this.store.dispatch({ type: '[Users API] Users Loaded Success' });
   }
 }

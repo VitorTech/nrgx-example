@@ -3,7 +3,7 @@
 import { User } from '../user/user.model';
 
 export const ADD_USER = 'ADD_USER';
-export const LIST_USERS = '[Users Page] Load Users';
+export const LIST_USERS = '[Users API] Users Loaded Success';
 
 export function userReducer(state: User[] = [], action: any) {
   switch (action.type) {
@@ -11,6 +11,7 @@ export function userReducer(state: User[] = [], action: any) {
       return [...state, action.payload];
     case LIST_USERS:
       return [...state, action.payload];
+
     default:
       return state;
   }
