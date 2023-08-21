@@ -19,12 +19,14 @@ export class AppComponent {
     this.store.dispatch({
       type: 'ADD_USER',
       payload: <User>{
-        name: name,
+        firstName: name,
         email: email,
       },
     });
   }
   ngOnInit() {
-    this.store.dispatch({ type: '[Users API] Users Loaded Success' });
+    this.store.dispatch({ type: '[Users Page] Load Users' });
+    this.users$.subscribe(users => console.log(users));
+    
   }
 }
