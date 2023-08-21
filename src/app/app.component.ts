@@ -12,7 +12,7 @@ import { AppState } from './app.state';
 export class AppComponent {
   title = 'ngrx-chat';
 
-  users: Observable<User[]> = this.store.select((state) => state.users);
+  users$: Observable<User[]> = this.store.select((state) => state.users);
 
   constructor(private store: Store<AppState>) {}
   addUser(name: string, email: string) {

@@ -13,7 +13,7 @@ export class UserEffects {
     mergeMap(() =>
       this.usersService.getAll().pipe(
         map((users) => ({
-          type: '[Movies API] Movies Loaded Success',
+          type: '[Users API] Users Loaded Success',
           payload: users,
         })),
         catchError(() => EMPTY)
