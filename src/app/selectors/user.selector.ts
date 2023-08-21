@@ -11,7 +11,7 @@ export interface AppState {
 
 export const selectFeature = (state: AppState) => state.feature;
 
-export const selectFeatureCount = createSelector(
+export const selectFeatureUsers = createSelector(
   selectFeature,
   (state: FeatureState) => state.users
 );
