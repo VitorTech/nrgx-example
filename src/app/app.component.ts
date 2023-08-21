@@ -25,8 +25,7 @@ export class AppComponent {
     });
   }
   ngOnInit() {
-    this.store.dispatch({ type: '[Users Page] Load Users' });
-    this.users$.subscribe(users => console.log(users));
+    this.store.dispatch({ type: '[Users Page] Load Users' })
     
   }
 }
