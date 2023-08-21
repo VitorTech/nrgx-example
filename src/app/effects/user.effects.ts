@@ -9,7 +9,7 @@ import { UsersService } from '../services/users.service';
 export class UserEffects {
   @Effect()
   loadUsers$ = this.actions$.pipe(
-    ofType('[Movies Page] Load Movies'),
+    ofType('[Users Page] Load Users'),
     mergeMap(() =>
       this.usersService.getAll().pipe(
         map((users) => ({

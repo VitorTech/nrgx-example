@@ -24,5 +24,7 @@ export class AppComponent {
       },
     });
   }
-  ngOnInit() {}
+  ngOnInit() {
+    this.store.dispatch({ type: '[Users Page] Load Users' });
+  }
 }
