@@ -1,17 +1,17 @@
 import { User } from '../user/user.model';
-import { createSelector } from '@ngrx/store';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 export interface FeatureState {
   users: User[];
 }
 
-export interface AppState {
+export interface UserAppState {
   feature: FeatureState;
 }
 
-export const selectFeature = (state: AppState) => state.feature;
+export const selectUserAppState = (state: UserAppState) => state.feature;
 
 export const selectFeatureUsers = createSelector(
-  selectFeature,
+  selectUserAppState,
   (state: FeatureState) => state.users
 );

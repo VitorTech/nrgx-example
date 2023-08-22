@@ -7,12 +7,21 @@ import { EffectsModule } from '@ngrx/effects';
 import { UserEffects } from './effects/user.effects';
 import { HttpClientModule } from '@angular/common/http'
 import { ChatComponent } from './components/chat.component';
-import { FormsModule } from '@angular/forms';
-import { HubService } from 'ngx-signalr-hubservice'; 
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HubService } from 'ngx-signalr-hubservice';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap'; 
 
 @NgModule({
   declarations: [AppComponent, ChatComponent],
-  imports: [BrowserModule, StoreModule.forRoot({ users: userReducer }), EffectsModule.forRoot([UserEffects]), HttpClientModule, FormsModule],
+  imports: [
+    BrowserModule, 
+    StoreModule.forRoot({ users: userReducer }), 
+    EffectsModule.forRoot([UserEffects]), 
+    HttpClientModule, 
+    FormsModule,
+    NgbModule,
+    ReactiveFormsModule
+  ],
   providers: [],
   bootstrap: [AppComponent],
 })

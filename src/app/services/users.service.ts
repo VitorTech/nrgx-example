@@ -8,6 +8,6 @@ export class UsersService {
   constructor(private http: HttpClient) {}
 
   getAll() {
-    return this.http.get('https://dummyjson.com/users?limit=10');
+    return this.http.get('https://localhost:7002/Users');
   }
 }

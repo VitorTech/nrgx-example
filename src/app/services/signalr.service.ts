@@ -17,32 +17,36 @@ export class SignalrService {
   public messages: chatMessage[] = [];
   private connectionUrl = 'https://localhost:7002/signalr';
   private apiUrl = 'https://localhost:7002/api/chat';
+  private username: string | null = '';
 
   constructor(private http: HttpClient) { }
 
-  public connect = () => {
+  public connect = (username: string | null) => {
+    this.username = username;
+
     this.startConnection();
     this.addListeners();
   }
 
-  public sendMessageToApi(message: string) {
-    return this.http.post(this.apiUrl, this.buildChatMessage(message))
+  public sendMessageToApi(message: string, username: string | null) {
+    return this.http.post(this.apiUrl, this.buildChatMessage(message, username))
       .pipe(tap(_ => console.log("message sucessfully sent to api controller")));
   }
 
-  public sendMessageToHub(message: string) {
-    var promise = this.hubConnection.invoke("BroadcastAsync", this.buildChatMessage(message))
-      .then(() => { console.log('message sent successfully to hub'); })
+  public sendMessageToHub(message: string, username: string | null) {
+    var promise = this.hubConnection.invoke("BroadcastAsync", this.buildChatMessage(message, username))
+      .then(() => { console.log(`message sent successfully to hub by ${username}`); })
       .catch((err: any) => console.log('error while sending a message to hub: ' + err));
 
     return from(promise);
   }
 
 
-  private buildChatMessage(message: string): chatMessage {
+  private buildChatMessage(message: string, username: string | null): chatMessage {
     return {
       connectionId: this.hubConnection.connectionId ?? '',
       text: message,
+      userName: username,
       dateTime: new Date()
     };
   }
@@ -71,10 +75,13 @@ export class SignalrService {
     })
     this.hubConnection.on("messageReceivedFromHub", (data: chatMessage) => {
       console.log("message received from Hub")
-      this.messages.push(data);
+      this.messages.push({...data, fromLoggedUser: data.userName == this.username});
     })
     this.hubConnection.on("newUserConnected", (_:any) => {
-      console.log("new user connected")
+      console.log(`new user connected: ${this.username}`)
+
+     
+      localStorage.setItem('user', this.username as string);
     })
   }
 }

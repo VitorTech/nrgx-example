@@ -10,7 +10,7 @@ export function userReducer(state: User[] = [], action: any) {
     case ADD_USER:
       return [...state, action.payload];
     case LIST_USERS:
-      return action.payload.users;
+      return action.payload;
     default:
       return state;
   }
