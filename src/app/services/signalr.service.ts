@@ -6,6 +6,7 @@ import { tap } from 'rxjs/operators';
 import { chatMessage } from '../models/chatMessage';
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
 import * as signalR from '@microsoft/signalr';
+import { ToastrService } from 'ngx-toastr';
 
 
 @Injectable({
@@ -19,7 +20,7 @@ export class SignalrService {
   private apiUrl = 'https://localhost:7002/api/chat';
   private username: string | null = '';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private toastr: ToastrService) { }
 
   public connect = (username: string | null) => {
     this.username = username;
@@ -78,8 +79,10 @@ export class SignalrService {
       this.messages.push({...data, fromLoggedUser: data.userName == this.username});
     })
     this.hubConnection.on("newUserConnected", (_:any) => {
+      console.log(_);
       console.log(`new user connected: ${this.username}`)
-
+      
+      this.toastr.success(`${this.username} has joined the chat`);
      
       localStorage.setItem('user', this.username as string);
     })

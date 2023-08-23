@@ -4,6 +4,7 @@ import { Store, select } from '@ngrx/store';
 import { AppState } from '../app.state';
 import { Observable } from 'rxjs';
 import { User } from '../user/user.model';
+import { removeDuplicates } from '../utils/array.utils';
 
 @Component({
   selector: 'chat-component',
@@ -19,13 +20,6 @@ export class ChatComponent implements OnInit {
 
 //   users$: Observable<User[]> = this.store.select((state) => state.users);
   users$: Observable<User[]> = this.store.select(e => {
-    const removeDuplicates = (array: any, key: any) => {
-        return array.reduce((arr: any, item: any) => {
-          const removed = arr.filter((i: any) => i[key] !== item[key]);
-          return [...removed, item];
-        }, []);
-      };
-
       const uniqueUsersByEmail = removeDuplicates(e.users, 'emailId');
       const uniqueUsersByPhone = removeDuplicates(uniqueUsersByEmail, 'phoneNumber');
 

@@ -10,17 +10,21 @@ import { ChatComponent } from './components/chat.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HubService } from 'ngx-signalr-hubservice';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap'; 
+import { ToastrModule } from 'ngx-toastr';
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 @NgModule({
   declarations: [AppComponent, ChatComponent],
   imports: [
-    BrowserModule, 
+    BrowserModule,
+    BrowserAnimationsModule, 
     StoreModule.forRoot({ users: userReducer }), 
     EffectsModule.forRoot([UserEffects]), 
     HttpClientModule, 
     FormsModule,
     NgbModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ToastrModule.forRoot()
   ],
   providers: [],
   bootstrap: [AppComponent],
