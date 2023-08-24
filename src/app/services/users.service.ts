@@ -10,4 +10,9 @@ export class UsersService {
   getAll() {
     return this.http.get('https://localhost:7002/Users');
   }
+
+  getHubUsers() {
+
+  }
+
 }

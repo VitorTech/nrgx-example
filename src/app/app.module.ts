@@ -12,13 +12,14 @@ import { HubService } from 'ngx-signalr-hubservice';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap'; 
 import { ToastrModule } from 'ngx-toastr';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import { usersLoggedReducer } from './reducers/usersLogged.reducer';
 
 @NgModule({
   declarations: [AppComponent, ChatComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule, 
-    StoreModule.forRoot({ users: userReducer }), 
+    StoreModule.forRoot({ users: userReducer, usersLogged: usersLoggedReducer }), 
     EffectsModule.forRoot([UserEffects]), 
     HttpClientModule, 
     FormsModule,

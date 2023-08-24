@@ -16,6 +16,20 @@
                     </li>
                     
                 </ul>
+                <h5>Users logged in</h5>
+                <ul class="list-unstyled chat-list mt-2 mb-0">
+                    <li class="clearfix" *ngFor="let user of signalRService.usersLogged" (click)="talkToUser(user.id)" >
+                        
+                            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="avatar">
+                            <div class="about">
+                                <div class="name">{{ user.userName }}</div>                                   
+                            </div>
+                      
+                        
+                    </li>
+                    
+                </ul>
+
             </div>
             <div class="chat">
                 <div class="chat-header clearfix">

@@ -7,6 +7,8 @@ import { chatMessage } from '../models/chatMessage';
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
 import * as signalR from '@microsoft/signalr';
 import { ToastrService } from 'ngx-toastr';
+import { UserLogged } from '../models/UserLogged';
+import { Conversation } from '../models/conversation';
 
 
 @Injectable({
@@ -16,9 +18,14 @@ export class SignalrService {
   private hubConnection: any;
 
   public messages: chatMessage[] = [];
+  public conversations: Conversation[] = [];
+  public roomId: string = '';
+  public usersLogged: UserLogged[] = [];
+  public userLogged: UserLogged | null = null;
   private connectionUrl = 'https://localhost:7002/signalr';
   private apiUrl = 'https://localhost:7002/api/chat';
   private username: string | null = '';
+  public contactedUserId: string = '';
 
   constructor(private http: HttpClient, private toastr: ToastrService) { }
 
@@ -29,27 +36,34 @@ export class SignalrService {
     this.addListeners();
   }
 
-  public sendMessageToApi(message: string, username: string | null) {
-    return this.http.post(this.apiUrl, this.buildChatMessage(message, username))
-      .pipe(tap(_ => console.log("message sucessfully sent to api controller")));
-  }
+  // public sendMessageToApi(message: string, loggedUser: UserLogged) {
+  //   return this.http.post(this.apiUrl, this.buildChatMessage(message, this.roomId, loggedUser))
+  //     .pipe(tap(_ => console.log("message sucessfully sent to api controller")));
+  // }
 
-  public sendMessageToHub(message: string, username: string | null) {
-    var promise = this.hubConnection.invoke("BroadcastAsync", this.buildChatMessage(message, username))
-      .then(() => { console.log(`message sent successfully to hub by ${username}`); })
+  public sendMessageToHub(message: string, loggedUser: UserLogged) {
+    var promise = this.hubConnection.invoke("BroadcastAsync", this.buildChatMessage(message, this.roomId, loggedUser))
+      .then()
       .catch((err: any) => console.log('error while sending a message to hub: ' + err));
 
     return from(promise);
   }
 
 
-  private buildChatMessage(message: string, username: string | null): chatMessage {
-    return {
+  private buildChatMessage(message: string, roomId: string, loggedUser: UserLogged): chatMessage {
+    const data = {
       connectionId: this.hubConnection.connectionId ?? '',
       text: message,
-      userName: username,
+      roomId: roomId,
+      loggedUserId: loggedUser.id,
+      userName: loggedUser.userName,
+      contactedUserId: this.contactedUserId,
       dateTime: new Date()
     };
+
+    console.log(data);
+    return data;
+   
   }
 
   public startConnection() {
@@ -58,8 +72,13 @@ export class SignalrService {
         .withUrl(this.connectionUrl, {skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets}).build();
         
       this.hubConnection.start()
-        .then(() => {
+        .then(()=> {
           console.log("connection established");
+
+           this.hubConnection.invoke("BroadcastAsyncNewUser", this.username)
+          .then(() => { console.log(`hub is now informed about new user `); })
+          .catch((err: any) => console.log('error while sending a message to hub: ' + err));
+          
           return resolve(true);
         })
         .catch((err: any) => {
@@ -71,20 +90,83 @@ export class SignalrService {
 
   private addListeners() {
     this.hubConnection.on("messageReceivedFromApi", (data: chatMessage) => {
-      console.log("message received from API Controller")
-      this.messages.push(data);
-    })
-    this.hubConnection.on("messageReceivedFromHub", (data: chatMessage) => {
-      console.log("message received from Hub")
-      this.messages.push({...data, fromLoggedUser: data.userName == this.username});
-    })
-    this.hubConnection.on("newUserConnected", (_:any) => {
-      console.log(_);
-      console.log(`new user connected: ${this.username}`)
-      
-      this.toastr.success(`${this.username} has joined the chat`);
      
-      localStorage.setItem('user', this.username as string);
+      console.log("message received from API Controller")
+      this.messages.push({...data, fromLoggedUser: data.userName == this.username});
+
+    
+      
     })
+    this.hubConnection.on("messageReceivedFromHub", (data: chatMessage, conversations: any) => {
+      this.conversations  = conversations;
+      
+      const loggedUser: UserLogged = JSON.parse(localStorage.getItem('user') as string);
+      
+        console.log("message received from Hub")
+     
+        this.messages.push({...data, fromLoggedUser: data.userName == this.username});
+  
+        const conversationData = this.conversations.find((conversation) => conversation.id== data.roomId);
+  
+        for (let chatMessage of conversationData?.chatMessages || []) {
+          this.messages.push({...chatMessage, fromLoggedUser: chatMessage.userName == this.username})
+        }
+      
+     
+    })
+   
+    this.hubConnection.on('MessageReceivedFromHubNewUser', (data: chatMessage, usersLogged: UserLogged[]) => {
+      this.usersLogged = usersLogged;
+      
+      if (data.userName != this.username) {
+        this.toastr.success(`${data.userName} has joined the chat`);
+      } else {
+        this.toastr.success(`You successfully joined the chat`);
+        
+        const userLoggedString = JSON.stringify(data);
+
+        this.userLogged = JSON.parse(userLoggedString);
+        
+        localStorage.setItem('user', JSON.stringify(data));
+        
+        
+      }
+    })
+
+    this.hubConnection.on('ConversationStarted', (conversation: Conversation) => {
+
+      
+      const loggedUser: UserLogged = JSON.parse(localStorage.getItem('user') as string);
+
+      if (conversation.loggedUserId == loggedUser.id || conversation.contactedUserId == loggedUser.id) {
+        console.log('conversation started');
+        console.log(conversation);
+        this.messages = [];
+  
+       for (let chatMessage of conversation.chatMessages) {
+        this.messages.push({...chatMessage, fromLoggedUser: chatMessage.userName == this.username});
+       }
+  
+  
+       this.roomId = conversation.id;
+      }
+      
+        
+      
+      
+      
+
+      // this.conversations.push({
+      //   roomId: this.roomId,
+      //   // messages: []
+      // })
+      
+    });
+  }
+
+  public talkToUser(loggedUserId: string, contactedUserId: string) {
+    this.contactedUserId = contactedUserId;
+      this.hubConnection.invoke("StartConversationAsync", {loggedUserId, contactedUserId})
+      .catch((err: any) => console.log('error trying to talk to user: ' + err));
   }
 }

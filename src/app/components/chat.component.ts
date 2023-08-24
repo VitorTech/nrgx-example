@@ -4,7 +4,8 @@ import { Store, select } from '@ngrx/store';
 import { AppState } from '../app.state';
 import { Observable } from 'rxjs';
 import { User } from '../user/user.model';
-import { removeDuplicates } from '../utils/array.utils';
+import { removeDuplicatesFromArray } from '../utils/array.utils';
+import { UserLogged } from '../models/UserLogged';
 
 @Component({
   selector: 'chat-component',
@@ -16,16 +17,19 @@ export class ChatComponent implements OnInit {
 
   title = 'chat-ui';
   text: string = '';
-  userLogged: string | null = localStorage.getItem('user');
+  
+  contactedUserId: string = '';
 
 //   users$: Observable<User[]> = this.store.select((state) => state.users);
   users$: Observable<User[]> = this.store.select(e => {
-      const uniqueUsersByEmail = removeDuplicates(e.users, 'emailId');
-      const uniqueUsersByPhone = removeDuplicates(uniqueUsersByEmail, 'phoneNumber');
+      const uniqueUsersByEmail = removeDuplicatesFromArray(e.users, 'emailId');
+      const uniqueUsersByPhone = removeDuplicatesFromArray(uniqueUsersByEmail, 'phoneNumber');
 
       return uniqueUsersByPhone;
     
   });
+
+  // usersLogged: any = this.store.select();
  
   constructor(private store: Store<AppState>, public signalRService: SignalrService) {
 
@@ -39,15 +43,26 @@ export class ChatComponent implements OnInit {
   }
 
   sendMessage(): void {
-    // this.signalRService.sendMessageToApi(this.text).subscribe({
-    //   next: _ => this.text = '',
-    //   error: (err) => console.error(err)
-    // });
+    const loggedUser: UserLogged = JSON.parse(localStorage.getItem('user') as string);
 
-    this.signalRService.sendMessageToHub(this.text, this.userName).subscribe({
+    this.signalRService.sendMessageToHub(this.text, loggedUser).subscribe({
       next: _ => this.text = '',
       error: (err) => console.error(err)
     });
+
+    // this.signalRService.sendMessageToHub(this.text, this.userName).subscribe({
+    //   next: _ => this.text = '',
+    //   error: (err) => console.error(err)
+    // });
   }
+
+  talkToUser(userId: string) {
+    const loggedUser: UserLogged = JSON.parse(localStorage.getItem('user') as string);
+
+   
+    this.signalRService.talkToUser(loggedUser.id, userId);
+  }
+
+
 
 }
