@@ -1,10 +1,10 @@
-<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
 
 <div class="container">
 <div class="row clearfix">
     <div class="col-lg-12">
-        <div class="card chat-app">
-            <div id="plist" class="people-list">
+        <div class="container-chat chat-app">
+            <div id="plist" class="card people-list">
                 <ul class="list-unstyled chat-list mt-2 mb-0">
                     <li class="clearfix" [ngClass]="user?.notification == true ? 'clearfix active' : 'clearfix'" *ngFor="let user of signalRService.usersLogged" (click)="talkToUser(user.id, $event)" >
                             <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="avatar">
@@ -14,7 +14,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="chat">
+            <div class="chat card">
                 <div class="chat-header clearfix">
                     <div class="row">
                         <div class="col-lg-6">
@@ -32,10 +32,17 @@
                     <ul class="m-b-0">
                         <li class="clearfix" *ngFor="let message of signalRService.messages">
                             <div [ngClass]="message.fromLoggedUser  ? 'message-data text-right' : 'message-data'">
-                                <span>{{ message.userName }} at {{ message.dateTime }}</span>
+                                <span>{{ message.userName }}</span>
                                 <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
                             </div>
-                            <div [ngClass]="message.fromLoggedUser ? 'message other-message float-right' : 'message my-message'"> {{ message.text }} </div>
+                            <div [ngClass]="message.fromLoggedUser ? 'message other-message float-right' : 'message my-message'"> 
+                                <div class="message-text">
+                                    <p>{{ message.text }} </p>
+                                </div>
+                                <div class="message-time">
+                                    <span style="font-size: 10px;"> {{ message.dateTime | date: 'HH:mm' }} <i class="fa-solid fa-clock"></i></span>
+                                </div>
+                            </div>
                         </li>
                         <!-- <li class="clearfix" >
                             <div class="message-data">
@@ -47,10 +54,11 @@
                 </div>
                 <div class="chat-message clearfix">
                     <div class="input-group mb-0">
+                        <input type="text" class="form-control" placeholder="Enter text here..." [(ngModel)]="text"> 
                         <div class="input-group-prepend">
-                            <span class="input-group-text" (click)="sendMessage()"><i class="fa fa-send"></i></span>
+                            <button class="icon-send" (click)="sendMessage()"><i class="fa-regular fa-paper-plane custom-icon"></i></button>
                         </div>
-                        <input type="text" class="form-control" placeholder="Enter text here..." [(ngModel)]="text">                                    
+                                                           
                     </div>
                 </div>
             </div>
