@@ -45,7 +45,7 @@ body{
 }
 
 .people-list .chat-list li.active {
-    background: #efefef
+    background-color: orange;
 }
 
 .people-list .chat-list li .name {

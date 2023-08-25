@@ -17,6 +17,7 @@ export class ChatComponent implements OnInit {
 
   title = 'chat-ui';
   text: string = '';
+  userLogged: UserLogged = JSON.parse(localStorage.getItem('user') as string);
   
   contactedUserId: string = '';
 
@@ -56,10 +57,12 @@ export class ChatComponent implements OnInit {
     // });
   }
 
-  talkToUser(userId: string) {
+  talkToUser(userId: string, event: Event) {
+    const element = event.target as HTMLElement;
+    element.classList.remove('active');
+    
     const loggedUser: UserLogged = JSON.parse(localStorage.getItem('user') as string);
 
-   
     this.signalRService.talkToUser(loggedUser.id, userId);
   }
 

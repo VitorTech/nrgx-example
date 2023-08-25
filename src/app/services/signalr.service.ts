@@ -26,6 +26,7 @@ export class SignalrService {
   private apiUrl = 'https://localhost:7002/api/chat';
   private username: string | null = '';
   public contactedUserId: string = '';
+  public contactedUser: any = ''
 
   constructor(private http: HttpClient, private toastr: ToastrService) { }
 
@@ -94,20 +95,30 @@ export class SignalrService {
       console.log("message received from API Controller")
       this.messages.push({...data, fromLoggedUser: data.userName == this.username});
 
-    
-      
     })
     this.hubConnection.on("messageReceivedFromHub", (data: chatMessage, conversations: any) => {
-      this.conversations  = conversations;
       
-      const loggedUser: UserLogged = JSON.parse(localStorage.getItem('user') as string);
+      this.conversations  = conversations;
+
+        this.usersLogged = this.usersLogged.map(user => {
+          if (user.id == data.loggedUserId && data.loggedUserId != this.userLogged?.id) {
+            return {
+              ...user,
+              notification: true
+   
+             }
+          }
+
+          return user;
+          
+        })
       
         console.log("message received from Hub")
      
         this.messages.push({...data, fromLoggedUser: data.userName == this.username});
   
         const conversationData = this.conversations.find((conversation) => conversation.id== data.roomId);
-  
+      
         for (let chatMessage of conversationData?.chatMessages || []) {
           this.messages.push({...chatMessage, fromLoggedUser: chatMessage.userName == this.username})
         }
@@ -124,49 +135,44 @@ export class SignalrService {
         this.toastr.success(`You successfully joined the chat`);
         
         const userLoggedString = JSON.stringify(data);
+        localStorage.setItem('user', userLoggedString);
 
-        this.userLogged = JSON.parse(userLoggedString);
-        
-        localStorage.setItem('user', JSON.stringify(data));
-        
-        
+        this.userLogged = JSON.parse(userLoggedString); 
       }
     })
 
     this.hubConnection.on('ConversationStarted', (conversation: Conversation) => {
 
+      const loggedUser: UserLogged = JSON.parse(localStorage.getItem('user') as string); 
       
-      const loggedUser: UserLogged = JSON.parse(localStorage.getItem('user') as string);
+      let contactedUser = null;
+      if (conversation.contactedUserId == loggedUser.id) {
+        contactedUser = this.usersLogged.find(user => user.id == conversation.loggedUserId);
+      } else {
+        contactedUser = this.usersLogged.find(user => user.id == conversation.contactedUserId);
+      }
+
+      this.contactedUser = contactedUser;
 
       if (conversation.loggedUserId == loggedUser.id || conversation.contactedUserId == loggedUser.id) {
-        console.log('conversation started');
-        console.log(conversation);
-        this.messages = [];
-  
-       for (let chatMessage of conversation.chatMessages) {
-        this.messages.push({...chatMessage, fromLoggedUser: chatMessage.userName == this.username});
-       }
-  
-  
-       this.roomId = conversation.id;
-      }
+          console.log('conversation started');
+          console.log(conversation);
+          this.messages = [];
+    
+          for (let chatMessage of conversation.chatMessages) {
+            this.messages.push({...chatMessage, fromLoggedUser: chatMessage.userName == this.username});
+          }
       
-        
-      
-      
-      
-
-      // this.conversations.push({
-      //   roomId: this.roomId,
-      //   // messages: []
-      // })
-      
+          this.roomId = conversation.id;
+        }
     });
   }
 
   public talkToUser(loggedUserId: string, contactedUserId: string) {
-    this.contactedUserId = contactedUserId;
+    if (contactedUserId != this.userLogged?.id && this.userLogged?.id == loggedUserId) {
+      this.contactedUserId = contactedUserId;
       this.hubConnection.invoke("StartConversationAsync", {loggedUserId, contactedUserId})
       .catch((err: any) => console.log('error trying to talk to user: ' + err));
+    }
   }
 }
